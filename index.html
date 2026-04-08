@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>QR Scanner Keren</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f2027, #2c5364);
+  color: white;
+  text-align: center;
+}
+
+h2 {
+  margin-top: 20px;
+}
+
+#reader {
+  width: 320px;
+  margin: 20px auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 20px #00ffe0;
+}
+
+#status {
+  margin-top: 15px;
+  font-size: 16px;
+  color: #00ffe0;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🔍 QR Scanner</h2>
+<div id="reader"></div>
+<div id="status">Arahkan kamera ke QR Code</div>
+
+<script>
+// suara beep
+let beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+
+function isValidURL(str) {
+  return str.startsWith("http://") || str.startsWith("https://");
+}
+
+function onScanSuccess(text) {
+  document.getElementById("status").innerText = "✔ Terdeteksi: " + text;
+
+  beep.play(); // bunyi beep
+
+  if (isValidURL(text)) {
+    setTimeout(() => {
+      window.location.href = text; // buka link
+    }, 800);
+  } else {
+    document.getElementById("status").innerText = "⚠ Bukan link!";
+  }
+}
+
+new Html5QrcodeScanner("reader", {
+  fps: 10,
+  qrbox: { width: 250, height: 250 }
+}).render(onScanSuccess);
+</script>
+
+</body>
+</html>
