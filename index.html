@@ -3,111 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hercu ID</title>
-<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  background: #000;
-  color: white;
-  font-family: Arial;
+  margin: 0;
+  background: #0f0a1a;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   height: 100vh;
+  font-family: sans-serif;
 }
 
-h2 {
-  color: #00ffcc;
-  margin-bottom: 10px;
+/* Tombol scan */
+#scanBtn {
+  padding: 15px 25px;
+  font-size: 18px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  box-shadow: 0 0 20px rgba(168,85,247,0.6);
 }
 
+/* Kamera full */
 #reader {
-  width: 90%;
-  max-width: 400px;
-  aspect-ratio: 1/1;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 0 20px #00ffcc;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: none;
 }
 
-#resultBox {
+/* Popup */
+#popup {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1e1b2e;
+  padding: 20px;
+  border-radius: 25px 25px 0 0;
   display: none;
-  margin-top: 15px;
   text-align: center;
-  width: 90%;
+  box-shadow: 0 -5px 25px rgba(168,85,247,0.4);
+}
+
+#popup p {
+  color: #ddd;
   word-break: break-all;
 }
 
+/* Tombol */
 button {
-  margin: 5px;
-  padding: 12px;
-  width: 120px;
+  margin: 6px;
+  padding: 10px 15px;
   border: none;
-  border-radius: 12px;
-  background: #00ffcc;
-  color: black;
+  border-radius: 10px;
+  color: white;
   font-weight: bold;
 }
 
-/* kalau layar besar (desktop) */
-@media (min-width: 768px) {
-  body {
-    background: #111;
-  }
+/* Warna tombol */
+.copy { background: #7c3aed; }
+.open { background: #9333ea; }
+.close { background: #c026d3; }
+
+/* efek tekan */
+button:active {
+  transform: scale(0.95);
 }
 </style>
 </head>
 
 <body>
 
-<h2>🔐 Hercu ID</h2>
+<button id="scanBtn">SCAN</button>
+
 <div id="reader"></div>
 
-<div id="resultBox">
-  <p id="linkText"></p>
-  <button onclick="copyLink()">📋 Copy</button>
-  <button onclick="openLink()">🌐 Open</button>
+<div id="popup">
+  <p id="resultText"></p>
+  <button class="copy" onclick="copyText()">Copy</button>
+  <button class="open" onclick="openLink()">Open</button>
+  <button class="close" onclick="closePopup()">Tutup</button>
 </div>
 
+<script src="https://unpkg.com/html5-qrcode"></script>
+
 <script>
-// hanya HP
-if (!/Android|iPhone/i.test(navigator.userAgent)) {
-  document.body.innerHTML = "<h2>❌ Buka di HP ya!</h2>";
-}
+let scanner;
+let scannedText = "";
 
-let scannedLink = "";
+document.getElementById("scanBtn").onclick = function () {
+  document.getElementById("reader").style.display = "block";
 
-function onScan(text) {
-  if (text.startsWith("http")) {
-    scannedLink = text;
-    document.getElementById("linkText").innerText = text;
-    document.getElementById("resultBox").style.display = "block";
-  }
-}
+  scanner = new Html5Qrcode("reader");
 
-function copyLink() {
-  navigator.clipboard.writeText(scannedLink);
-  alert("Link disalin!");
+  scanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      scannedText = decodedText;
+
+      scanner.stop().then(() => {
+        document.getElementById("reader").style.display = "none";
+
+        document.getElementById("popup").style.display = "block";
+        document.getElementById("resultText").innerText = decodedText;
+      });
+    }
+  );
+};
+
+function copyText() {
+  navigator.clipboard.writeText(scannedText);
+  alert("Tersalin!");
 }
 
 function openLink() {
-  window.location.href = scannedLink;
+  window.open(scannedText, "_blank");
 }
 
-const qr = new Html5Qrcode("reader");
-qr.start(
-  { facingMode: "environment" },
-  { fps: 10, qrbox: { width: 250, height: 250 } },
-  onScan
-);
+function closePopup() {
+  document.getElementById("popup").style.display = "none";
+}
 </script>
 
 </body>
