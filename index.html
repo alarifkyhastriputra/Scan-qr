@@ -2,70 +2,91 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>QR Scanner Keren</title>
+<title>Hercu ID - QR Scanner</title>
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body {
-  margin: 0;
-  font-family: Arial;
-  background: linear-gradient(135deg, #0f2027, #2c5364);
+  background: #000;
   color: white;
   text-align: center;
+  font-family: Arial;
 }
 
 h2 {
   margin-top: 20px;
+  color: #00ffcc;
 }
 
 #reader {
   width: 320px;
   margin: 20px auto;
-  border-radius: 20px;
+  border-radius: 15px;
   overflow: hidden;
-  box-shadow: 0 0 20px #00ffe0;
+  box-shadow: 0 0 15px #00ffcc;
 }
 
-#status {
+#resultBox {
+  display: none;
   margin-top: 15px;
-  font-size: 16px;
-  color: #00ffe0;
+}
+
+button {
+  margin: 5px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #00ffcc;
+  color: black;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🔍 QR Scanner</h2>
+<h2>🔐 Hercu ID Scanner</h2>
 <div id="reader"></div>
-<div id="status">Arahkan kamera ke QR Code</div>
+
+<div id="resultBox">
+  <p id="linkText"></p>
+  <button onclick="copyLink()">📋 Copy</button>
+  <button onclick="openLink()">🌐 Open</button>
+</div>
 
 <script>
-// suara beep
-let beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-
-function isValidURL(str) {
-  return str.startsWith("http://") || str.startsWith("https://");
+// hanya HP
+if (!/Android|iPhone/i.test(navigator.userAgent)) {
+  document.body.innerHTML = "<h2>❌ Buka di HP!</h2>";
 }
 
-function onScanSuccess(text) {
-  document.getElementById("status").innerText = "✔ Terdeteksi: " + text;
+let scannedLink = "";
 
-  beep.play(); // bunyi beep
-
-  if (isValidURL(text)) {
-    setTimeout(() => {
-      window.location.href = text; // buka link
-    }, 800);
-  } else {
-    document.getElementById("status").innerText = "⚠ Bukan link!";
+function onScan(text) {
+  if (text.startsWith("http")) {
+    scannedLink = text;
+    document.getElementById("linkText").innerText = text;
+    document.getElementById("resultBox").style.display = "block";
   }
 }
 
-new Html5QrcodeScanner("reader", {
-  fps: 10,
-  qrbox: { width: 250, height: 250 }
-}).render(onScanSuccess);
+// copy
+function copyLink() {
+  navigator.clipboard.writeText(scannedLink);
+  alert("Link disalin!");
+}
+
+// open
+function openLink() {
+  window.location.href = scannedLink;
+}
+
+// start kamera belakang
+const qr = new Html5Qrcode("reader");
+qr.start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  onScan
+);
 </script>
 
 </body>
